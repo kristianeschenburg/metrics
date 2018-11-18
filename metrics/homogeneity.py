@@ -14,23 +14,13 @@ def dice(l1, l2):
         cluster assignments
     """
 
-    u_l1 = np.unique(l1)[1:]
-    u_l2 = np.unique(l2)[1:]
+    st1 = set(l1)
+    st2 = set(l2)
 
-    l1_len = np.asarray([len(np.where(l1 == k)[0]) for k in u_l1])[:, None]
-    l2_len = np.asarray([len(np.where(l2 == k)[0]) for k in u_l2])[:, None]
+    inter = len(st1.intersection(st2))
+    union = len(st1)+len(st2)
 
-    l1_reps = np.repeat(l1_len, axis=1, repeats=len(u_l2))
-    l2_reps = np.repeat(l2_len, axis=1, repeats=len(u_l1))
-
-    l1_finds = label2hot(l1)
-    l2_finds = label2hot(l2)
-
-    intersect = l1_finds.T.dot(l2_finds).T
-    unions = l1_reps.T + l2_reps
-
-    dice = intersect / unions
-    dice = dice[dice > 0].mean()
+    dice = inter / union
 
     return dice
 

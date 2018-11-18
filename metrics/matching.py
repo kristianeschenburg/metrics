@@ -5,8 +5,7 @@ from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment as lsa
 from sklearn.metrics.pairwise import euclidean_distances
 
-import homogeneity as hmg
-
+from metrics import homogeneity as hmg
 
 def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
 
@@ -27,10 +26,10 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
 
     # Get unique label values in non-moving and moving brain
     row_labs = np.asarray(list(set(row_labels).difference({0})))
-    row_labs = np.int32(row_labs)
-
     col_labs = np.asarray(list(set(col_labels).difference({0})))
-    col_labs = np.int32(col_labs)
+
+    print(row_labs)
+    print(col_labs)
 
     # Initialize cost matrix
     costMatrix = np.zeros((len(row_labs), len(col_labs)))
@@ -38,12 +37,18 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
     # Compute pairwise costs between all label sets
     for i, r in enumerate(row_labs):
         indr = np.where(row_labels == r)[0]
-        featr = row_feats[indr, :]
         lr = len(indr)
+        print(indr.shape)
+
+        if metric in ["Spearman","Euclidean","Pearson"]:
+            featr = row_feats[indr, :]
 
         for j, c in enumerate(col_labs):
             indc = np.where(col_labels == c)[0]
-            featc = col_feats[indc, :]
+            print(indc.shape)
+            
+            if metric in ["Spearman","Euclidean","Pearson"]:
+                featc = col_feats[indc, :]
 
             if metric == "Spearman":
                 [rVal, pVal] = spearmanr(featr, featc, axis=1)
@@ -53,11 +58,12 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
             elif metric == "Euclidean":
                 rVal = euclidean_distances(featr, featc)
             elif metric == "Dice":
+                print('Is Dice: ')
                 rVal = 1-hmg.dice(indr, indc)
-                rVal = 1-rVal
 
-            costMatrix[i, j] = np.mean(rVal)
+            costMatrix[i, j] = rVal
 
+    print(costMatrix)
     return [row_labs, col_labs, costMatrix]
 
 
