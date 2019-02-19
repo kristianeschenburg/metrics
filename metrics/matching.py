@@ -28,9 +28,6 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
     row_labs = np.asarray(list(set(row_labels).difference({0})))
     col_labs = np.asarray(list(set(col_labels).difference({0})))
 
-    print(row_labs)
-    print(col_labs)
-
     # Initialize cost matrix
     costMatrix = np.zeros((len(row_labs), len(col_labs)))
 
@@ -38,14 +35,12 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
     for i, r in enumerate(row_labs):
         indr = np.where(row_labels == r)[0]
         lr = len(indr)
-        print(indr.shape)
 
         if metric in ["Spearman","Euclidean","Pearson"]:
             featr = row_feats[indr, :]
 
         for j, c in enumerate(col_labs):
             indc = np.where(col_labels == c)[0]
-            print(indc.shape)
             
             if metric in ["Spearman","Euclidean","Pearson"]:
                 featc = col_feats[indc, :]
@@ -58,12 +53,11 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
             elif metric == "Euclidean":
                 rVal = euclidean_distances(featr, featc)
             elif metric == "Dice":
-                print('Is Dice: ')
                 rVal = 1-hmg.dice(indr, indc)
 
             costMatrix[i, j] = rVal
 
-    print(costMatrix)
+
     return [row_labs, col_labs, costMatrix]
 
 
@@ -90,7 +84,7 @@ def linear_assignment(row_list, col_list, costMatrix):
     return mapping
 
 
-def linearAssignmentParcellation(col_labels, label_mapping):
+def linearAssignmentParcellation(col_labels, label_mapping, slabels):
     """
     Generate the new cortical map, based on label to label assignments.
 
@@ -106,5 +100,15 @@ def linearAssignmentParcellation(col_labels, label_mapping):
     for k, v in label_mapping.items():
         indv = np.where(col_labels == v)[0]
         z[indv] = k
+
+    maxt = np.max(z)
+    inds = np.where(col_labels>0)[0]
+    zeros = inds[(z[inds]==0)]
+
+    leftovers = np.unique(col_labels[zeros])
+
+    for j,left in enumerate(leftovers):
+        indlft = np.where(col_labels == left)
+        z[indlft] = maxt + j + 1
 
     return z
