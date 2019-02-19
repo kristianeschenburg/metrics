@@ -73,11 +73,6 @@ def linear_assignment(row_list, col_list, costMatrix):
 
     # Compute linear assignment
     ar, ac = lsa(costMatrix)
-    print(ar)
-    print(row_list)
-    print()
-    print(ac)
-    print(col_list)
 
     rows = row_list[ar]
     cols = col_list[ac]
