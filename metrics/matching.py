@@ -57,10 +57,6 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
 
             costMatrix[i, j] = rVal
 
-<<<<<<< HEAD
-=======
-
->>>>>>> aa1fcb7c11dbf92128994df616be200316b12abe
     return [row_labs, col_labs, costMatrix]
 
 
@@ -95,11 +91,7 @@ def linear_assignment(row_list, col_list, costMatrix):
     return remapped, unmapped
 
 
-<<<<<<< HEAD
-def linearAssignmentParcellation(col_labels, label_mapping, unmapped):
-=======
 def linearAssignmentParcellation(col_labels, label_mapping, slabels):
->>>>>>> aa1fcb7c11dbf92128994df616be200316b12abe
     """
     Generate the new cortical map, based on label to label assignments.
 
@@ -117,14 +109,6 @@ def linearAssignmentParcellation(col_labels, label_mapping, slabels):
         indv = np.where(col_labels == v)[0]
         z[indv] = k
 
-<<<<<<< HEAD
-    max_remapped = np.max(list(label_mapping.keys()))
-
-    for i, unmp in enumerate(unmapped):
-        print('Mapping {:} to {:}'.format(unmp, max_remapped+(i+1)))
-        inds = np.where(col_labels == unmp)[0]
-        z[inds] = max_remapped + (i+1)
-=======
     maxt = np.max(z)
     inds = np.where(col_labels>0)[0]
     zeros = inds[(z[inds]==0)]
@@ -134,6 +118,5 @@ def linearAssignmentParcellation(col_labels, label_mapping, slabels):
     for j,left in enumerate(leftovers):
         indlft = np.where(col_labels == left)
         z[indlft] = maxt + j + 1
->>>>>>> aa1fcb7c11dbf92128994df616be200316b12abe
 
     return z
