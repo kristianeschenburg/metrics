@@ -9,7 +9,7 @@ def tpdVector(matr, diagonal=None):
     Parameters:
     - - - - -
         matr : topological matrix, each index counts strength of adjacency
-                between twp labels
+                between two labels
     """
 
     if diagonal:

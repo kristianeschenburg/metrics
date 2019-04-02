@@ -4,8 +4,17 @@ from scipy.stats import spearmanr
 from scipy.spatial.distance import cdist
 from scipy.optimize import linear_sum_assignment as lsa
 from sklearn.metrics.pairwise import euclidean_distances
+from scipy.stats import wasserstein_distance as emd
 
 from metrics import homogeneity as hmg
+
+def cost(target_features, source_features, metric='Pearson'):
+
+    """
+    Compute distance between two feature arrays.
+    """
+
+    if metric == 
 
 def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
 
@@ -16,20 +25,23 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
 
     Parameters:
     - - - - -
-        row_feats,col_feats : arrays of feature data corresponding to a
-                                cortical map
-        row_labels,col_labels : arrays of cortical map labels
-        metric : metric to use to build a similarity matrix.
-                The matrix index values will be mnipulated accordingly to
-                generate positive, integer-valued costs.
+        row_feats, col_feats : float, array
+            feature data each each vertex
+        row_labels, col_labels : int, arrary
+            cortical parcellation vectors
+        metric : string
+            metric to use to build a similarity matrix. 
+            The matrix index values will be mnipulated accordingly to
+            generate positive, integer-valued costs.
     """
 
     # Get unique label values in non-moving and moving brain
-    row_labs = np.asarray(list(set(row_labels).difference({0})))
-    col_labs = np.asarray(list(set(col_labels).difference({0})))
+    row_labs = np.asarray(list(set(row_labels).difference({-1, 0})))
+    col_labs = np.asarray(list(set(col_labels).difference({-1, 0})))
 
     # Initialize cost matrix
     costMatrix = np.zeros((len(row_labs), len(col_labs)))
+    print(costMatrix.shape)
 
     # Compute pairwise costs between all label sets
     for i, r in enumerate(row_labs):
@@ -46,14 +58,27 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
                 featc = col_feats[indc, :]
 
             if metric == "Spearman":
-                [rVal, pVal] = spearmanr(featr, featc, axis=1)
+                [rVal, _] = spearmanr(featr, featc, axis=1)
                 rVal = 1-rVal[lr:, 0:lr]
+
             elif metric == "Pearson":
-                rVal = np.mean(cdist(featr, featc))
+                rVal = cdist(featr, featc, metric='Correlation').mean()
+
             elif metric == "Euclidean":
-                rVal = euclidean_distances(featr, featc)
+                rVal = cdist(featr, featc).mean()
+
             elif metric == "Dice":
                 rVal = 1-hmg.dice(indr, indc)
+
+            elif metric == "EMD":
+                rmu = row_feats[indr, :].mean(0)
+                rmu = rmu / np.linalg.norm(rmu)
+
+                cmu = col_feats[indc, :].mean(0)
+                cmu = cmu / np.linalg.norm(cmu)
+
+                rVal = emd(rmu, cmu)
+
 
             costMatrix[i, j] = rVal
 

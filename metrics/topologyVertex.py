@@ -1,30 +1,33 @@
 import numpy as np
 
 
-def labelCounts(label, values, adjacencyList):
+def labelCounts(label, adjacencyList):
 
     """
-    For each v in values, count number of vertices of other labels that are
-    adjacent to v.
+    For each vertex, count the number of vertices with other labels that are
+    adjacent to it.
 
     Parameters:
     - - - - -
-        label : label array
-        values : values to compute neighborhood structure of
-        adjacencyList : adjacency structure for surface corresponding to
-                        cortical map
-
+    label : int, array
+        label vector
+    adjacencyList : SurfaceAdjacency
+        adjacency list for surface mesh
     """
 
-    values = list(set(values).difference({0}))
+    values = list(set(np.unique(label)).difference({-1,0 }))
 
     aggregateCounts = {k: {h: 0 for h in values} for k in values}
     aggregateMatrix = np.zeros((len(values), len(values)))
 
+    # loop over each unique label value
     for j, v in enumerate(values):
 
+        # get indices of label
         idxv = np.where(label == v)[0]
 
+        # loop over vertices with this label and count number of neighboring vertices
+        # with different label values
         for ind in idxv:
             n = adjacencyList[ind]
             nCounts = neighborhoodCounts(n, label, values)
@@ -32,29 +35,34 @@ def labelCounts(label, values, adjacencyList):
             for n in nCounts:
                 aggregateCounts[v][n] += nCounts[n]
 
-        aggregateMatrix[j, :] = aggregateCounts[v].values()
-        row_sums = aggregateMatrix.sum(axis=1)
-        rowNorm = aggregateMatrix / (1.*row_sums[:, np.newaxis])
+        counts = aggregateCounts[v].values()
+        aggregateMatrix[j, :] = counts
+    
+    rowSums = aggregateMatrix.sum(axis=1)
+    rowNormed = aggregateMatrix / rowSums[:, None]
 
-    return [aggregateCounts, rowNorm]
+    return [aggregateMatrix, rowNormed]
 
 
-def neighborhoodCounts(subscripts, reshaped, values):
+def neighborhoodCounts(subscripts, label, values):
+
     """
-    Compute the number of neighbors of each label directory adjacency to a
+    Compute the number of neighbors of each label directly adjacent to a
     vertex.
 
     Parameters:
     - - - - -
-        subscripts : indices of directly-adjacency vertices / voxels
-        reshaped : label vector
-        values : accepted label values
+    subscripts : list
+        indices of directly-adjacent vertices / voxels
+    reshaped : int, array
+        label vector
+    values : accepted label values
     """
 
-    labels = list(reshaped[subscripts])
+    neighbors = list(label[subscripts])
     counts = {}.fromkeys(values)
 
     for v in values:
-        counts[v] = labels.count(v)
+        counts[v] = neighbors.count(v)
 
     return counts
