@@ -72,10 +72,10 @@ def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
 
             elif metric == "EMD":
                 rmu = row_feats[indr, :].mean(0)
-                rmu = rmu / np.linalg.norm(rmu)
+                rmu  = rmu/rmu.sum()
 
                 cmu = col_feats[indc, :].mean(0)
-                cmu = cmu / np.linalg.norm(cmu)
+                cmu = cmu/cmu.sum()
 
                 rVal = emd(rmu, cmu)
 
