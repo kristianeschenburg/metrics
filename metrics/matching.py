@@ -8,14 +8,6 @@ from scipy.stats import wasserstein_distance as emd
 
 from metrics import homogeneity as hmg
 
-def cost(target_features, source_features, metric='Pearson'):
-
-    """
-    Compute distance between two feature arrays.
-    """
-
-    if metric == 
-
 def costMatrix(row_feats, col_feats, row_labels, col_labels, metric="Pearson"):
 
     """
